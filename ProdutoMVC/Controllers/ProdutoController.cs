@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProdutoMVC.Models;
 
@@ -22,10 +18,25 @@ namespace ProdutoMVC.Controllers
         // GET: Produto/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            var produto = repository.DetalharProduto(id);
+
+            if (produto == null)
+            {
+                StatusCode(404);
+            }
+
+            return View(produto);
         }
 
         // GET: Produto/Create
+        public ActionResult Create()
+        {
+            return View();
+        }
+
+        // POST: Produto/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult Create(Produto produto)
         {
             try
@@ -44,67 +55,54 @@ namespace ProdutoMVC.Controllers
             }
         }
 
-        // POST: Produto/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
-        {
-            try
-            {
-                // TODO: Add insert logic here
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
         // GET: Produto/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            var produto = repository.DetalharProduto(id);
+
+            if (produto == null)
+            {
+                StatusCode(404);
+            }
+
+            return View(produto);
         }
 
         // POST: Produto/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(Produto produto)
         {
-            try
+            if (ModelState.IsValid)
             {
-                // TODO: Add update logic here
-
-                return RedirectToAction(nameof(Index));
+                repository.AtualizarProduto(produto);
+                return RedirectToAction("Index");
             }
-            catch
+            else
             {
-                return View();
+                return RedirectToAction("Index");
             }
         }
 
         // GET: Produto/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            var produto = repository.DetalharProduto(id);
+
+            if (produto == null)
+            {
+                StatusCode(404);
+            }
+            return View(produto);
         }
 
         // POST: Produto/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(Produto produto)
         {
-            try
-            {
-                // TODO: Add delete logic here
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            repository.ExcluirProduto(produto.Id);
+            return RedirectToAction("Index");
         }
     }
 }

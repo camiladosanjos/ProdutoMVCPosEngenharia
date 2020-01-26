@@ -3,8 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ProdutoMVC.ProdutoRepository
 {
@@ -18,7 +16,9 @@ namespace ProdutoMVC.ProdutoRepository
 
             using (var connection = new SqlConnection(connectionString))
             {
-                var cmdTxt = "SELECT * FROM Produto";
+                var cmdTxt = 
+                    "SELECT * FROM Produto";
+
                 var select = new SqlCommand(cmdTxt, connection);
 
                 try
@@ -59,8 +59,8 @@ namespace ProdutoMVC.ProdutoRepository
 
             using (var connection = new SqlConnection(connectionString))
             {
-                var cmdTxt = "INSERT INTO " +
-                    "Produto (Nome, Fabricante, CodigoDeBarras, Preco, Estoque) " +
+                var cmdTxt = 
+                    "INSERT INTO Produto (Nome, Fabricante, CodigoDeBarras, Preco, Estoque) " +
                     "VALUES (@Nome, @Fabricante, @CodigoDeBarras, @Preco, @Estoque)";
 
                 var cmd = new SqlCommand(cmdTxt, connection);
@@ -86,6 +86,108 @@ namespace ProdutoMVC.ProdutoRepository
                 }
             }
 
+        }
+
+        public void AtualizarProduto(Produto produto)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                string cmdTxt = 
+                    "UPDATE Produto " +
+                    "SET Nome=@Nome, Fabricante=@Fabricante, CodigoDeBarras=@CodigoDeBarras, Preco=@Preco, Estoque=@Estoque " +
+                    "Where Id=@Id";
+
+                var cmd = new SqlCommand(cmdTxt, connection);
+                cmd.CommandType = CommandType.Text;
+                cmd.Parameters.AddWithValue("@Id", produto.Id);
+                cmd.Parameters.AddWithValue("@Nome", produto.Nome);
+                cmd.Parameters.AddWithValue("@Fabricante", produto.Fabricante);
+                cmd.Parameters.AddWithValue("@CodigoDeBarras", produto.CodigoDeBarras);
+                cmd.Parameters.AddWithValue("@Preco", produto.Preco);
+                cmd.Parameters.AddWithValue("@Estoque", produto.Estoque);
+
+                try
+                {
+                    connection.Open();
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception e)
+                {
+
+                    throw e;
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+        }
+
+        public Produto DetalharProduto(int id)
+        {
+            using(var connection = new SqlConnection(connectionString))
+            {
+                var cmdTxt = 
+                    "SELECT Id, Nome, Fabricante, CodigoDeBarras, Preco, Estoque " +
+                    "FROM Produto " +
+                    "Where Id = @Id";
+
+                var cmd = new SqlCommand(cmdTxt, connection);
+                cmd.CommandType = CommandType.Text;
+                cmd.Parameters.AddWithValue("@Id", id);
+
+                Produto produto = null;
+
+                try
+                {
+                    connection.Open();
+
+                    using (var reader = cmd.ExecuteReader(CommandBehavior.CloseConnection)) 
+                    {
+                        if (reader.HasRows)
+                        {
+                            if (reader.Read())
+                            {
+                                produto = new Produto();
+                                produto.Id = (int)reader["Id"];
+                                produto.Nome = reader["Nome"].ToString();
+                                produto.Fabricante = reader["Fabricante"].ToString();
+                                produto.CodigoDeBarras = reader["CodigoDeBarras"].ToString();
+                                produto.Preco = (decimal)reader["Preco"];
+                                produto.Estoque = (int)reader["Estoque"];
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+
+                    throw e;
+                }
+                return produto;
+            }
+        }
+
+        public void ExcluirProduto(int id)
+        {
+            using(var connection = new SqlConnection(connectionString))
+            {
+                var cmdTxt = "DELETE Produto Where Id=@Id";
+                var cmd = new SqlCommand(cmdTxt, connection);
+                cmd.CommandType = CommandType.Text;
+                cmd.Parameters.AddWithValue("@Id", id);
+
+                try
+                {
+                    connection.Open();
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception e)
+                {
+
+                    throw e;
+                }
+            }
         }
 
     }
